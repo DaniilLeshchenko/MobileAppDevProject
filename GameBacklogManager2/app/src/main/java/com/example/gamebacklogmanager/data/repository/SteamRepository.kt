@@ -12,11 +12,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
+/**
+ * Repository responsible for calling Steam APIs and transforming responses
+ * into usable app data.
+ */
 class SteamRepository(
     private val steamApiService: SteamApiService,
     private val steamStoreService: SteamStoreService
 ) {
 
+    /** Returns the list of owned games for a Steam user. */
     suspend fun getUserOwnedGames(steamId: String): List<SteamGameItem> {
         return withContext(Dispatchers.IO) {
             try {
@@ -32,6 +37,7 @@ class SteamRepository(
         }
     }
 
+    /** Retrieves basic player profile info. */
     suspend fun getPlayerSummary(steamId: String): SteamPlayer? {
         return withContext(Dispatchers.IO) {
             try {
@@ -47,6 +53,7 @@ class SteamRepository(
         }
     }
 
+    /** Fetches detailed game info from the Steam Store. */
     suspend fun getGameDetails(appId: Int): SteamGameDetails? {
         return withContext(Dispatchers.IO) {
             try {
@@ -63,7 +70,8 @@ class SteamRepository(
             }
         }
     }
-    
+
+    /** Searches the Steam Store by keyword. */
     suspend fun searchStore(term: String): List<StoreItem> {
         return withContext(Dispatchers.IO) {
             try {
@@ -76,10 +84,14 @@ class SteamRepository(
         }
     }
 
+    /**
+     * Fetches both the game's achievement schema and the player's progress,
+     * then merges them into UI-ready models.
+     */
     suspend fun getAchievements(steamId: String, appId: Int): List<AchievementUiModel> {
         return withContext(Dispatchers.IO) {
             try {
-                // Run schema and player stats requests in parallel
+                // Run both API calls in parallel
                 val schemaDeferred = async { 
                     try {
                         steamApiService.getGameSchema(Constants.STEAM_API_KEY, appId) 
@@ -96,17 +108,17 @@ class SteamRepository(
 
                 val schemaAchievements = schemaResponse?.game?.availableGameStats?.achievements ?: emptyList()
                 val playerAchievements = playerStatsResponse?.playerstats?.achievements ?: emptyList()
-                
-                // Map api name to achieved status (1 or 0)
+
+                // Map achieved to Boolean
                 val achievedMap = playerAchievements.associate { it.apiname to (it.achieved == 1) }
 
+                // Merge schema + progress
                 schemaAchievements.map { schema ->
                     val isUnlocked = achievedMap[schema.name] == true
                     AchievementUiModel(
                         apiName = schema.name,
                         displayName = schema.displayName,
                         description = schema.description,
-                        // Use unlocked icon if unlocked, otherwise gray. Fallback to icon if gray is missing.
                         iconUrl = if (isUnlocked) schema.icon else (schema.icongray ?: schema.icon),
                         isUnlocked = isUnlocked,
                         isHidden = schema.hidden == 1

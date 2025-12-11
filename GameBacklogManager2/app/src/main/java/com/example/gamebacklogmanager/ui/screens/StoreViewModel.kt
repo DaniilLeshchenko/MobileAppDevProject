@@ -9,6 +9,10 @@ import com.example.gamebacklogmanager.data.remote.model.StoreItem
 import com.example.gamebacklogmanager.data.repository.SteamRepository
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for Steam Store search screen.
+ * Handles input query, API calls, loading state and results.
+ */
 class StoreViewModel(
     private val steamRepository: SteamRepository
 ) : ViewModel() {
@@ -25,10 +29,15 @@ class StoreViewModel(
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    /** Updates the search input field. */
     fun updateSearchQuery(query: String) {
         searchQuery = query
     }
 
+    /**
+     * Performs search request through SteamRepository.
+     * Updates results, loading state and error messages accordingly.
+     */
     fun searchStore() {
         if (searchQuery.isBlank()) return
         

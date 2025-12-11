@@ -12,12 +12,3 @@ val NeonTertiary = Color(0xFF39FF14)
 val NeonError = Color(0xFFFF2A2A)        
 
 val GamingTextPrimary = Color(0xFFEAEAEA)
-val GamingTextSecondary = Color(0xFFAAAAAA)
-
-val Purple80 = NeonPrimary
-val PurpleGrey80 = NeonSecondary
-val Pink80 = NeonTertiary
-
-val Purple40 = NeonPrimary
-val PurpleGrey40 = NeonSecondary
-val Pink40 = NeonTertiary

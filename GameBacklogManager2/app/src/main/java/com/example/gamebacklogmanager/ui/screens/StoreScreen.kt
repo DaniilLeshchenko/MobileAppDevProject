@@ -25,7 +25,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +49,9 @@ import com.example.gamebacklogmanager.R
 import com.example.gamebacklogmanager.data.remote.model.StoreItem
 import com.example.gamebacklogmanager.ui.AppViewModelProvider
 
+/**
+ * Screen for searching Steam Store games and adding them to local library.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreScreen(
@@ -72,12 +74,16 @@ fun StoreScreen(
             )
         }
     ) { innerPadding ->
+
+        // Main content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+
+            // Search Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -105,10 +111,12 @@ fun StoreScreen(
                 }
             }
 
+            // Loading indicator
             if (viewModel.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp))
             }
 
+            // Error message
             viewModel.errorMessage?.let { error ->
                 Text(
                     text = error,
@@ -117,6 +125,7 @@ fun StoreScreen(
                 )
             }
 
+            // Search results list
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -136,6 +145,9 @@ fun StoreScreen(
     }
 }
 
+/**
+ * Card component displaying Steam store game info + action buttons.
+ */
 @Composable
 fun StoreItemCard(
     item: StoreItem,
@@ -147,6 +159,8 @@ fun StoreItemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
+
+            // Game image
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(item.headerImage ?: item.tinyImage)
@@ -161,17 +175,21 @@ fun StoreItemCard(
             )
 
             Column(modifier = Modifier.padding(12.dp)) {
+
+                // Game title
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                
+
+                // Price + Metascore
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Price section
                     if (item.price != null) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (item.price.discountPercent > 0) {
@@ -189,7 +207,8 @@ fun StoreItemCard(
                     } else {
                         Text("Free / N/A", style = MaterialTheme.typography.bodyMedium)
                     }
-                    
+
+                    // Metacritic score
                     if (item.metascore != null && item.metascore.isNotEmpty()) {
                          Text(
                              text = "Metacritic: ${item.metascore}",
@@ -198,7 +217,8 @@ fun StoreItemCard(
                          )
                     }
                 }
-                
+
+                // Buttons add to library / open store
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)

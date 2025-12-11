@@ -31,7 +31,6 @@ private val DarkColorScheme = darkColorScheme(
     error = NeonError
 )
 
-// Gaming UI usually prefers Dark theme always, but we define Light for fallback (mapped to dark colors for consistency or simple light)
 private val LightColorScheme = darkColorScheme(
     primary = NeonPrimary,
     secondary = NeonSecondary,
@@ -47,7 +46,6 @@ private val LightColorScheme = darkColorScheme(
     error = NeonError
 )
 
-// Tech/Gaming Typography
 val GamingTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Monospace,
@@ -72,7 +70,7 @@ val GamingTypography = Typography(
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.Monospace,
-        fontWeight = FontWeight.Bold, // Changed to Bold for headers
+        fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp
@@ -103,8 +101,7 @@ val GamingTypography = Typography(
 @Composable
 fun GameBacklogManagerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false, // Disabled dynamic color to enforce Gaming Palette
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

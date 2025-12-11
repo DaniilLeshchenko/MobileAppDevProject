@@ -9,19 +9,24 @@ import kotlin.math.sqrt
 
 class ShakeDetector(context: Context) : SensorEventListener {
 
+    // Sensor setup
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     
     private var onShakeListener: (() -> Unit)? = null
     private var lastShakeTime: Long = 0
+
+    // Shake detection thresholds
     private val SHAKE_THRESHOLD_GRAVITY = 2.7F
     private val SHAKE_SLOP_TIME_MS = 500
 
+    // Start listening for shakes
     fun start(onShake: () -> Unit) {
         onShakeListener = onShake
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
     }
 
+    // Stop listening
     fun stop() {
         sensorManager.unregisterListener(this)
         onShakeListener = null
@@ -30,6 +35,7 @@ class ShakeDetector(context: Context) : SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         if (onShakeListener == null) return
 
+        // Read acceleration
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
@@ -38,12 +44,14 @@ class ShakeDetector(context: Context) : SensorEventListener {
         val gY = y / SensorManager.GRAVITY_EARTH
         val gZ = z / SensorManager.GRAVITY_EARTH
 
-        // gForce will be close to 1 when there is no movement.
+        // Calculate g-force
         val gForce = sqrt((gX * gX + gY * gY + gZ * gZ).toDouble()).toFloat()
 
+        // Check if shake is strong enough
         if (gForce > SHAKE_THRESHOLD_GRAVITY) {
             val now = System.currentTimeMillis()
-            // ignore shake events too close to each other (500ms)
+
+            // Prevent repeated triggers
             if (lastShakeTime + SHAKE_SLOP_TIME_MS > now) {
                 return
             }
@@ -53,6 +61,5 @@ class ShakeDetector(context: Context) : SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Do nothing
     }
 }

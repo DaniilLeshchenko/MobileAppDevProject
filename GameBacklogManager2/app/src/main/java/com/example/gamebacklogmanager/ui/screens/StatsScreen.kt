@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gamebacklogmanager.ui.AppViewModelProvider
 
+/**
+ * Screen displaying summary statistics about user's game library.
+ */
 @Composable
 fun StatsScreen(
     viewModel: StatsViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -41,6 +44,7 @@ fun StatsScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            // Header title
             Text(
                 text = "Statistics",
                 style = MaterialTheme.typography.headlineLarge,
@@ -48,13 +52,15 @@ fun StatsScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
+            // Total games
             StatCard(
                 title = "TOTAL GAMES",
                 value = uiState.totalGames.toString(),
                 borderColor = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(16.dp))
-            
+
+            // Completed & Backlog
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 StatCard(
                     title = "COMPLETED",
@@ -73,6 +79,7 @@ fun StatsScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Now playing & Abandoned
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 StatCard(
                     title = "NOW PLAYING",
@@ -88,7 +95,8 @@ fun StatsScreen(
                     borderColor = MaterialTheme.colorScheme.error
                 )
             }
-            
+
+            // Total playtime
             Spacer(modifier = Modifier.height(16.dp))
             StatCard(
                 title = "TOTAL HOURS",
@@ -99,6 +107,9 @@ fun StatsScreen(
     }
 }
 
+/**
+ * Reusable card component for displaying a single numeric stat.
+ */
 @Composable
 fun StatCard(
     title: String,
@@ -124,7 +135,7 @@ fun StatCard(
                 text = value,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = borderColor // Match value color to border
+                color = borderColor
             )
         }
     }

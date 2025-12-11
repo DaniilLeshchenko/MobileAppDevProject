@@ -48,6 +48,9 @@ import com.example.gamebacklogmanager.ui.AppViewModelProvider
 import com.example.gamebacklogmanager.ui.components.GameCard
 import com.example.gamebacklogmanager.ui.components.GameListItem
 
+/**
+ * Main screen showing user’s game library grouped by status.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -87,6 +90,8 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         Column(modifier = modifier.padding(innerPadding)) {
+
+            // Search bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,10 +117,12 @@ fun HomeScreen(
                 )
             }
 
+            // Content list of groups
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 80.dp)
             ) {
+                // Horizontal Now Playing carousel
                 if (uiState.nowPlayingGames.isNotEmpty()) {
                     item {
                         Text(
@@ -137,6 +144,7 @@ fun HomeScreen(
                     }
                 }
 
+                // Expandable categories
                 if (uiState.purchasedGames.isNotEmpty()) {
                     item {
                         ExpandableSection(
@@ -162,7 +170,8 @@ fun HomeScreen(
                         ExpandableSection(title = "Abandoned", games = uiState.abandonedGames, onGameClick = onGameClick)
                     }
                 }
-                
+
+                // Empty state message
                 if (uiState.nowPlayingGames.isEmpty() && uiState.purchasedGames.isEmpty() && 
                     uiState.completedGames.isEmpty() && uiState.abandonedGames.isEmpty()) {
                     item {
@@ -178,6 +187,9 @@ fun HomeScreen(
     }
 }
 
+/**
+ * Expandable category showing a list of games (Purchased, Completed, etc.).
+ */
 @Composable
 fun ExpandableSection(
     title: String,
@@ -187,6 +199,8 @@ fun ExpandableSection(
     var expanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
+
+        // Section header with expand/collapse toggle
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -204,7 +218,8 @@ fun ExpandableSection(
                 contentDescription = if (expanded) "Collapse" else "Expand"
             )
         }
-        
+
+        // Show list when expanded
         if (expanded) {
             games.forEach { game ->
                 GameListItem(game = game, onClick = onGameClick)

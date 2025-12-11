@@ -16,12 +16,19 @@ import com.example.gamebacklogmanager.ui.screens.SettingsScreen
 import com.example.gamebacklogmanager.ui.screens.StatsScreen
 import com.example.gamebacklogmanager.ui.screens.StoreScreen
 
+/**
+ * Defines all app navigation routes.
+ */
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Home : Screen("home")
+
+    /** Detail screen with a required gameId argument. */
     object Detail : Screen("detail/{gameId}") {
         fun createRoute(gameId: Int) = "detail/$gameId"
     }
+
+    /** Add/Edit screen with optional gameId and steamAppId. */
     object AddEditGame : Screen("add_edit_game?gameId={gameId}&steamAppId={steamAppId}") {
         fun createRoute(gameId: Int? = null, steamAppId: String? = null) = 
             "add_edit_game?gameId=${gameId ?: ""}&steamAppId=${steamAppId ?: ""}"
@@ -32,12 +39,16 @@ sealed class Screen(val route: String) {
     object Store : Screen("store")
 }
 
+/**
+ * Main navigation graph for the application.
+ */
 @Composable
 fun GameBacklogNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.Login.route
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
+        /** Login to Home navigation. */
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginClick = {
@@ -47,6 +58,7 @@ fun GameBacklogNavHost(
                 }
             )
         }
+        /** Home screen with navigation to detail, add/edit, stats, etc. */
         composable(Screen.Home.route) {
             HomeScreen(
                 onGameClick = { gameId ->
@@ -66,6 +78,7 @@ fun GameBacklogNavHost(
                 }
             )
         }
+        /** Detail screen (requires gameId). */
         composable(
             route = Screen.Detail.route,
             arguments = listOf(navArgument("gameId") { type = NavType.IntType })
@@ -74,6 +87,7 @@ fun GameBacklogNavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
+        /** Add/Edit Game screen with optional arguments. */
         composable(
             route = Screen.AddEditGame.route,
             arguments = listOf(
@@ -90,7 +104,6 @@ fun GameBacklogNavHost(
             val savedStateHandle = backStackEntry.savedStateHandle
             val capturedImage = savedStateHandle.get<String>("captured_image_path")
             
-            // Note: Argument processing happens in ViewModel usually or passed here
             val steamAppIdArg = backStackEntry.arguments?.getString("steamAppId")
             
             AddEditGameScreen(
@@ -100,6 +113,7 @@ fun GameBacklogNavHost(
                 steamAppIdToLoad = steamAppIdArg
             )
         }
+        /** Camera screen returns captured image via savedStateHandle. */
         composable(Screen.Camera.route) {
             CameraScreen(
                 onImageCaptured = { path ->
@@ -110,12 +124,15 @@ fun GameBacklogNavHost(
                 }
             )
         }
+        /** Stats screen (read-only). */
         composable(Screen.Stats.route) {
             StatsScreen()
         }
+        /** Settings screen. */
         composable(Screen.Settings.route) {
             SettingsScreen()
         }
+        /** Steam Store search screen. */
         composable(Screen.Store.route) {
             StoreScreen(
                 onNavigateBack = { navController.popBackStack() },

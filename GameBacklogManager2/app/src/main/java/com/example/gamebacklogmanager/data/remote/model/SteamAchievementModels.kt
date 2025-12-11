@@ -1,54 +1,68 @@
 package com.example.gamebacklogmanager.data.remote.model
 
-import com.google.gson.annotations.SerializedName
-
-// --- Player Achievements Status ---
+/**
+ * Response for player achievement progress.
+ */
 data class PlayerAchievementsResponse(
     val playerstats: PlayerStats?
 )
 
+/**
+ * Contains player's achievement data for a specific game.
+ */
 data class PlayerStats(
     val steamID: String,
     val gameName: String,
     val achievements: List<PlayerAchievementStatus>?,
     val success: Boolean
 )
-
+/**
+ * Status of a single achievement (locked/unlocked).
+ */
 data class PlayerAchievementStatus(
     val apiname: String,
-    val achieved: Int, // 1 if achieved, 0 if not
+    val achieved: Int,
     val unlocktime: Long
 )
-
-// --- Game Schema (Icons, Titles) ---
+/**
+ * Response containing the full achievement schema for a game.
+ */
 data class GameSchemaResponse(
     val game: GameSchemaData?
 )
+/**
+ * Contains available stats and achievement definitions.
+ */
 
 data class GameSchemaData(
     val availableGameStats: AvailableGameStats?
 )
-
+/**
+ * List of all achievements defined for the game.
+ */
 data class AvailableGameStats(
     val achievements: List<SchemaAchievement>?
 )
-
+/**
+ * Definition of a single achievement (name, icons, description, etc.).
+ */
 data class SchemaAchievement(
-    val name: String, // Matches apiname
+    val name: String,
     val displayName: String,
     val defaultvalue: Int,
-    val hidden: Int, // 0 or 1
+    val hidden: Int,
     val description: String?,
-    val icon: String, // URL for unlocked icon
-    val icongray: String? // URL for locked icon
+    val icon: String,
+    val icongray: String?
 )
-
-// --- Combined UI Model ---
+/**
+ * UI-ready achievement model used in the app.
+ */
 data class AchievementUiModel(
     val apiName: String,
     val displayName: String,
     val description: String?,
     val iconUrl: String,
     val isUnlocked: Boolean,
-    val isHidden: Boolean // If hidden and locked, maybe don't show description
+    val isHidden: Boolean
 )

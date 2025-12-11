@@ -28,16 +28,19 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.gamebacklogmanager.R
 import com.example.gamebacklogmanager.data.local.GameEntity
-import com.example.gamebacklogmanager.data.model.GameStatus
+import com.example.gamebacklogmanager.data.remote.model.GameStatus
 import java.io.File
 
+/**
+ * Card UI component used to display a game in grid view.
+ */
 @Composable
 fun GameCard(
     game: GameEntity,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Highlight "Now Playing" games with a primary border color
+    // Highlight currently played games
     val borderColor = if (game.status == GameStatus.NOW_PLAYING) 
         MaterialTheme.colorScheme.primary 
     else 
@@ -53,6 +56,7 @@ fun GameCard(
         )
     ) {
         Column {
+            // Use custom local image if available, otherwise network image
             val imageModel = if (game.localBoxImagePath != null) {
                 File(game.localBoxImagePath)
             } else {
@@ -60,14 +64,11 @@ fun GameCard(
             }
 
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageModel)
-                    .crossfade(true)
-                    .build(),
+                model = imageModel,
                 contentDescription = game.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp), // Removed rounded clip here, letting Card shape handle it (standard M3)
+                    .height(150.dp),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_launcher_background), 
                 error = painterResource(R.drawable.ic_launcher_background)
@@ -81,7 +82,7 @@ fun GameCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${game.progressHours.toInt()} HRS", // All caps for tech feel
+                    text = "${game.progressHours.toInt()} HRS",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -90,13 +91,16 @@ fun GameCard(
     }
 }
 
+/**
+ * List-style UI component for displaying a game in vertical lists.
+ */
 @Composable
 fun GameListItem(
     game: GameEntity,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Color coding borders based on status
+    // Color indicates game status (completed, abandoned, etc.)
     val borderColor = when (game.status) {
         GameStatus.COMPLETED -> MaterialTheme.colorScheme.tertiary
         GameStatus.ABANDONED -> MaterialTheme.colorScheme.error
@@ -125,10 +129,7 @@ fun GameListItem(
             }
 
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageModel)
-                    .crossfade(true)
-                    .build(),
+                model = imageModel,
                 contentDescription = game.title,
                 modifier = Modifier
                     .size(60.dp)

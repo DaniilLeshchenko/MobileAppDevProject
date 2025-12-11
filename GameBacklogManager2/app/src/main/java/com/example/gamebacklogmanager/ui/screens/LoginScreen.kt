@@ -12,8 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-
+/**
+ * Simple login/start screen with app title and a single "Enter" button.
+ */
 @Composable
 fun LoginScreen(
     onLoginClick: () -> Unit = {}
@@ -23,8 +26,15 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Game Backlog Manager", style = MaterialTheme.typography.headlineLarge)
+        // App title displayed in the center of the screen
+        Text(
+            text = "Game Backlog\nManager", 
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
         Spacer(modifier = Modifier.height(32.dp))
+
+        // Button that triggers navigation into the app
         Button(onClick = onLoginClick) {
             Text(text = "Enter")
         }

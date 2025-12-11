@@ -1,5 +1,6 @@
 package com.example.gamebacklogmanager.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +19,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -50,11 +51,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.gamebacklogmanager.R
-import com.example.gamebacklogmanager.data.model.GameStatus
+import com.example.gamebacklogmanager.data.remote.model.GameStatus
 import com.example.gamebacklogmanager.data.remote.model.AchievementUiModel
 import com.example.gamebacklogmanager.ui.AppViewModelProvider
 import java.io.File
 
+/**
+ * Screen for displaying full details of a selected game:
+ * box art, metadata, status, description, and Steam achievements.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -75,6 +80,7 @@ fun DetailScreen(
                     }
                 },
                 actions = {
+                    // Delete button
                     IconButton(onClick = {
                         viewModel.deleteGame()
                         onNavigateBack()
@@ -92,6 +98,7 @@ fun DetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             game?.let { g ->
+                // Box Art
                 val imageModel = if (g.localBoxImagePath != null) {
                     File(g.localBoxImagePath)
                 } else {
@@ -112,6 +119,7 @@ fun DetailScreen(
                     error = painterResource(R.drawable.ic_launcher_background)
                 )
 
+                // Basic Info
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(text = g.title, style = MaterialTheme.typography.headlineMedium)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -129,12 +137,16 @@ fun DetailScreen(
                         )
                     }
 
+                    // Status Selection
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Change Status", style = MaterialTheme.typography.titleMedium)
                     
-                    Card(
+                    OutlinedCard(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        colors = CardDefaults.outlinedCardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             GameStatus.values().forEach { status ->
@@ -158,13 +170,14 @@ fun DetailScreen(
                         }
                     }
 
+                    // Description
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Description", style = MaterialTheme.typography.titleMedium)
                     Text(
                         text = g.description.ifBlank { "No description available." },
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    
+
                     // Achievements Section
                     if (achievements.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
@@ -173,7 +186,8 @@ fun DetailScreen(
                         val unlockedCount = achievements.count { it.isUnlocked }
                         val totalCount = achievements.size
                         val progress = if (totalCount > 0) unlockedCount.toFloat() / totalCount else 0f
-                        
+
+                        // Progress bar
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
@@ -201,15 +215,16 @@ fun DetailScreen(
     }
 }
 
+/**
+ * Collapsible achievement list showing first 5 items by default.
+ */
 @Composable
 fun AchievementsList(achievements: List<AchievementUiModel>) {
     var expanded by remember { mutableStateOf(false) }
-    // Sort: Unlocked first, then hidden ones last
     val sortedAchievements = remember(achievements) {
         achievements.sortedWith(compareByDescending<AchievementUiModel> { it.isUnlocked }.thenBy { it.isHidden })
     }
     
-    // Show top 5 or all if expanded
     val displayList = if (expanded) sortedAchievements else sortedAchievements.take(5)
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -240,6 +255,9 @@ fun AchievementsList(achievements: List<AchievementUiModel>) {
     }
 }
 
+/**
+ * UI row for a single achievement including icon, name, and description.
+ */
 @Composable
 fun AchievementItem(achievement: AchievementUiModel) {
     Row(
@@ -255,7 +273,7 @@ fun AchievementItem(achievement: AchievementUiModel) {
                 .build(),
             contentDescription = achievement.displayName,
             modifier = Modifier.size(48.dp),
-            // Optional: apply saturation 0 if locked, but the API provides a gray icon usually
+            // Grayscale locked icons
             colorFilter = if (!achievement.isUnlocked && achievement.iconUrl.contains("gray")) null else if (!achievement.isUnlocked) ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) else null
         )
         
@@ -268,6 +286,7 @@ fun AchievementItem(achievement: AchievementUiModel) {
                 fontWeight = if (achievement.isUnlocked) FontWeight.Bold else FontWeight.Normal,
                 color = if (achievement.isUnlocked) MaterialTheme.colorScheme.onSurface else Color.Gray
             )
+            // Show description unless hidden & locked
             if (!achievement.isHidden || achievement.isUnlocked) {
                  achievement.description?.let {
                      Text(

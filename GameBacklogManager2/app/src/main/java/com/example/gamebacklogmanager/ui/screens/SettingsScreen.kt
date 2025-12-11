@@ -39,14 +39,18 @@ import coil.request.ImageRequest
 import com.example.gamebacklogmanager.data.repository.UserPreferencesRepository
 import com.example.gamebacklogmanager.ui.AppViewModelProvider
 
+/**
+ * Settings screen: Steam profile setup, library sync, notifications and app info.
+ */
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    // Simple state for notification toggle, ideally in ViewModel but for simplicity here:
     val preferencesRepository = remember { UserPreferencesRepository(context) }
+
+    // Local state for notifications toggle
     var notificationsEnabled by remember { mutableStateOf(preferencesRepository.isNotificationsEnabled) }
     
     Scaffold { innerPadding ->
@@ -56,6 +60,7 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            // HEADER
             Text(text = "Settings", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(24.dp))
             
@@ -66,6 +71,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Steam ID input
                 OutlinedTextField(
                     value = viewModel.steamId,
                     onValueChange = { viewModel.updateSteamId(it) },
@@ -84,6 +90,8 @@ fun SettingsScreen(
                     )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
+
+                // Save button
                 Button(onClick = { 
                     viewModel.saveSteamId() 
                     keyboardController?.hide()
@@ -91,11 +99,13 @@ fun SettingsScreen(
                     Text("Save")
                 }
             }
-            
+
+            // Loading indicator for Steam fetch
             if (viewModel.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
-            
+
+            // Steam profile info
             viewModel.steamProfile?.let { profile ->
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -118,8 +128,8 @@ fun SettingsScreen(
                         Text(text = "Steam Connected", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
-                
-                // Sync Button
+
+                // Steam library sync button
                 Button(
                     onClick = { viewModel.syncLibrary() },
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -128,7 +138,8 @@ fun SettingsScreen(
                     Text("Sync Steam Library")
                 }
             }
-            
+
+            // Sync success or progress message
             viewModel.syncStatus?.let { status ->
                  Text(
                      text = status, 
@@ -137,13 +148,15 @@ fun SettingsScreen(
                      modifier = Modifier.padding(top = 8.dp)
                  )
             }
-            
+
+            // Error message
             viewModel.errorMessage?.let { error ->
                  Text(text = error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            
+
+            // NOTIFICATIONS
             Text(text = "Notifications", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -162,6 +175,8 @@ fun SettingsScreen(
             }
             
             Spacer(modifier = Modifier.height(24.dp))
+
+            // ABOUT
             Text(text = "About", style = MaterialTheme.typography.titleMedium)
             Text(text = "Game Backlog Manager v1.0", style = MaterialTheme.typography.bodyMedium)
         }

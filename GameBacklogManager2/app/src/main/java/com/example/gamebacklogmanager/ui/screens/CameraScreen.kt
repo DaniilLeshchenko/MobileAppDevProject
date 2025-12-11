@@ -1,7 +1,6 @@
 package com.example.gamebacklogmanager.ui.screens
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -40,13 +39,17 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.Executor
 
+/**
+ * Camera screen using CameraX to capture a game box image.
+ */
 @Composable
 fun CameraScreen(
     onImageCaptured: (String) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    
+
+    // Permission state
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -56,6 +59,7 @@ fun CameraScreen(
         )
     }
 
+    // Request camera permission
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
@@ -63,6 +67,7 @@ fun CameraScreen(
         }
     )
 
+    // Ask for permission on first launch
     LaunchedEffect(key1 = true) {
         if (!hasCameraPermission) {
             launcher.launch(Manifest.permission.CAMERA)
@@ -73,6 +78,7 @@ fun CameraScreen(
         val imageCapture = remember { ImageCapture.Builder().build() }
         
         Box(modifier = Modifier.fillMaxSize()) {
+            // Camera preview view (AndroidView to host CameraX PreviewView)
             AndroidView(
                 factory = { ctx ->
                     val previewView = PreviewView(ctx)
@@ -102,7 +108,7 @@ fun CameraScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Define Camera Icon Vector manually to avoid dependency issues
+            /** Simple custom-drawn camera icon. */
             val cameraIcon = remember {
                 ImageVector.Builder(
                     name = "Camera",
@@ -136,12 +142,13 @@ fun CameraScreen(
                 }.build()
             }
 
+            // Camera icon button (FAB)
             FloatingActionButton(
                 onClick = {
                     takePhoto(
                         filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
                         imageCapture = imageCapture,
-                        outputDirectory = context.filesDir, // Saving to internal storage
+                        outputDirectory = context.filesDir, 
                         executor = ContextCompat.getMainExecutor(context),
                         onImageCaptured = onImageCaptured,
                         onError = { Log.e("CameraScreen", "Photo capture failed: ${it.message}", it) }
@@ -158,12 +165,16 @@ fun CameraScreen(
             }
         }
     } else {
+        // Permission not granted UI
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Camera permission is required")
         }
     }
 }
 
+/**
+ * Takes a photo using CameraX and saves it to internal storage.
+ */
 private fun takePhoto(
     filenameFormat: String,
     imageCapture: ImageCapture,

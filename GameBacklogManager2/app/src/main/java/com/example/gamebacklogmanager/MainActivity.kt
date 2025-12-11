@@ -30,12 +30,20 @@ import com.example.gamebacklogmanager.utils.ShakeDetector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * Main entry point of the app.
+ * Handles UI initialization, notification permission requests,
+ * shake detection, and displaying random game recommendations.
+ */
 class MainActivity : ComponentActivity() {
     
     private lateinit var shakeDetector: ShakeDetector
     private var showRecommendationDialog by mutableStateOf(false)
     private var recommendedGame by mutableStateOf<GameEntity?>(null)
 
+    /**
+     * Initializes the UI, theme, permission requests, and sets up navigation.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,14 +53,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             GameBacklogManagerTheme {
                 val context = LocalContext.current
-                
-                // Request Notification Permission for Android 13+
+
+                // Request POST_NOTIFICATIONS permission
                 if (Build.VERSION.SDK_INT >= 33) {
                     val permissionLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission(),
-                        onResult = { isGranted ->
-                            // Handle permission granted/denied if needed
-                        }
+                        onResult = { }
                     )
                     
                     LaunchedEffect(key1 = true) {
@@ -70,8 +76,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // Main navigation host
                     GameBacklogNavHost()
-                    
+
+                    // Dialog shown when a shake triggers a recommendation
                     if (showRecommendationDialog && recommendedGame != null) {
                         val description = recommendedGame?.description
                         val displayDescription = if (!description.isNullOrBlank() && description != "Imported from Steam") {
@@ -98,6 +106,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Starts shake detection when the activity becomes visible.
+     */
     override fun onResume() {
         super.onResume()
         shakeDetector.start {
@@ -105,16 +116,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Stops shake detection when the activity is no longer visible.
+     */
     override fun onPause() {
         super.onPause()
         shakeDetector.stop()
     }
 
+    /**
+     * Handles a detected shake gesture.
+     * Selects a random game and opens the recommendation dialog.
+     */
     private fun handleShake() {
         if (showRecommendationDialog) return
 
         val repository = (application as GameApplication).container.gameRepository
-
+        
         lifecycleScope.launch {
             val games = repository.getAllGames().first()
             if (games.isNotEmpty()) {

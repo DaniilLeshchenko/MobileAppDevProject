@@ -41,10 +41,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.gamebacklogmanager.R
-import com.example.gamebacklogmanager.data.model.GameStatus
+import com.example.gamebacklogmanager.data.remote.model.GameStatus
 import com.example.gamebacklogmanager.ui.AppViewModelProvider
 import java.io.File
-
+/**
+ * Screen for adding or editing a game entry.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditGameScreen(
@@ -57,12 +59,14 @@ fun AddEditGameScreen(
     val uiState = viewModel.gameUiState
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Load captured image into UI state
     LaunchedEffect(capturedImagePath) {
         if (capturedImagePath != null) {
             viewModel.updateLocalBoxImage(capturedImagePath)
         }
     }
-    
+
+    // Auto-load Steam game details when opened from Store screen
     LaunchedEffect(steamAppIdToLoad) {
         if (!steamAppIdToLoad.isNullOrBlank()) {
             viewModel.searchGameByAppId(steamAppIdToLoad)
@@ -88,11 +92,9 @@ fun AddEditGameScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Steam Import Section - Store Search logic removed (moved to StoreScreen)
-            // Kept specific App ID search
+            // Steam Search Section
             Text(text = "Find on Steam by ID", style = MaterialTheme.typography.titleMedium)
-            
-            // Search Specific Game by App ID
+
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -123,6 +125,7 @@ fun AddEditGameScreen(
                 }
             }
 
+            // Loading + Error Feedback
             if (viewModel.isLoadingSteamGames) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(8.dp))
             }
@@ -132,9 +135,10 @@ fun AddEditGameScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+            // Game Details
             Text(text = "Game Details", style = MaterialTheme.typography.titleMedium)
 
-            // Box Art Image
+            // Display selected or downloaded image
             if (uiState.localBoxImagePath != null) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -165,6 +169,7 @@ fun AddEditGameScreen(
                 )
             }
 
+            // Open camera to take custom box art photo
             Button(
                 onClick = onOpenCamera,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
@@ -172,6 +177,7 @@ fun AddEditGameScreen(
                 Text(if (uiState.localBoxImagePath == null) "Take Photo of Box" else "Retake Photo")
             }
 
+            // Text Fields
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = { viewModel.updateUiState(uiState.copy(title = it)) },
@@ -195,6 +201,7 @@ fun AddEditGameScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
+            // Status Selection
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "Status")
             GameStatus.values().forEach { status ->
@@ -216,6 +223,7 @@ fun AddEditGameScreen(
                 }
             }
 
+            // Save Button
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = { 
